@@ -38,6 +38,7 @@ import { useScrollToBottom } from './use-scroll-to-bottom';
 import { VersionFooter } from './version-footer';
 import LatexEditor from './latex-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import ResumePreview from './resume-preview';
 // import 'katex/dist/katex.min.css';
 
 // Function to detect LaTeX content in messages
@@ -59,6 +60,15 @@ export interface UIBlock {
     height: number;
   };
   isLatex?: boolean;
+}
+
+interface PDFState {
+  loading: boolean;
+  error: string | null;
+  pdfUrl: string | null;
+  compilationLog: string | null;
+  pageNumber: number;
+  numPages: number | null;
 }
 
 export function Block({
@@ -128,6 +138,14 @@ export function Block({
   const [document, setDocument] = useState<Document | null>(null);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+  const [pdfState, setPdfState] = useState<PDFState>({
+    loading: false,
+    error: null,
+    pdfUrl: null,
+    compilationLog: null,
+    pageNumber: 1,
+    numPages: null
+  });
 
   // Effect to detect LaTeX content in messages
   useEffect(() => {
@@ -141,7 +159,15 @@ export function Block({
             content: latexContent,
             isLatex: true,
           }));
-          setMode('latex');
+          setMode('latex');          // Switch to editor tab when streaming starts
+          setActiveTab('editor');
+          // Reset PDF state to loading
+          setPdfState(prev => ({
+            ...prev,
+            loading: true,
+            error: null,
+            pdfUrl: null
+          }));
         }
       }
     }
@@ -282,6 +308,60 @@ export function Block({
   const isMobile = windowWidth ? windowWidth < 768 : false;
 
   const [_, copyToClipboard] = useCopyToClipboard();
+
+  // Function to compile LaTeX and update PDF state
+  const compileLaTeX = useCallback(async (latexContent: string) => {
+    setPdfState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const response = await fetch('/api/compile-latex', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latexSource: latexContent })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'PDF compilation failed');
+      }
+
+      // Create blob URL from the PDF buffer
+      const pdfBlob = await response.blob();
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      setPdfState(prev => ({
+        ...prev,
+        loading: false,
+        error: null,
+        pdfUrl,
+        compilationLog: null
+      }));
+    } catch (error: any) {
+      setPdfState(prev => ({
+        ...prev,
+        loading: false,
+        error: error.message,
+        pdfUrl: null,
+        compilationLog: error.log || null
+      }));
+    }
+  }, []);
+
+  // Effect to compile LaTeX when streaming is complete
+  useEffect(() => {
+    if (!isLoading && block.isLatex && block.content) {
+      compileLaTeX(block.content);
+    }
+  }, [isLoading, block.isLatex, block.content, compileLaTeX]);
+
+  // Clean up blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfState.pdfUrl) {
+        URL.revokeObjectURL(pdfState.pdfUrl);
+      }
+    };
+  }, [pdfState.pdfUrl]);
 
   return (
     <motion.div className="flex flex-row h-dvh w-dvw fixed top-0 left-0 z-50 bg-background">
@@ -540,11 +620,11 @@ export function Block({
             </div>
           </TabsContent>
           <TabsContent value="preview" className="flex-1 m-0 p-0 data-[state=active]:flex">
-            <div className="flex items-center justify-center w-full h-full bg-white">
-              <div className="text-muted-foreground text-lg">
-                PDF Preview Coming Soon...
-              </div>
-            </div>
+            <ResumePreview
+              latexContent={block.content}
+              pdfState={pdfState}
+              setPdfState={setPdfState}
+            />
           </TabsContent>
         </Tabs>
 

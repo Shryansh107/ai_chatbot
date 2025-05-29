@@ -4,7 +4,7 @@ import type { Message } from 'ai';
 import cx from 'classnames';
 import { motion } from 'framer-motion';
 import type { Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import type { Vote } from '@/lib/db/schema';
 
@@ -41,6 +41,22 @@ export const PreviewMessage = ({
   isLoading: boolean;
 }) => {
   const latexContent = message.role === 'assistant' ? detectLatexContent(message.content as string) : null;
+  const messageContent = message.role === 'assistant' && latexContent 
+    ? (message.content as string).replace(/```latex\n([\s\S]*?)(?:\n```|$)/, '') 
+    : message.content;
+
+  // Auto-open artifact when LaTeX content is first detected during streaming
+  useEffect(() => {
+    if (isLoading && latexContent && !block.isVisible) {
+      setBlock((currentBlock) => ({
+        ...currentBlock,
+        content: latexContent,
+        isLatex: true,
+        isVisible: true,
+        title: 'LaTeX Editor',
+      }));
+    }
+  }, [isLoading, latexContent, block.isVisible, setBlock]);
 
   return (
     <motion.div
@@ -61,9 +77,9 @@ export const PreviewMessage = ({
         )}
 
         <div className="flex flex-col gap-2 w-full">
-          {message.content && (
+          {messageContent && (
             <div className="flex flex-col gap-4">
-              <Markdown>{message.content as string}</Markdown>
+              <Markdown>{messageContent as string}</Markdown>
             </div>
           )}
 
@@ -150,7 +166,7 @@ export const PreviewMessage = ({
               vote={vote}
               isLoading={isLoading}
             />
-            {latexContent && (
+            {latexContent && !isLoading && (
               <Button
                 variant="outline"
                 className="py-1 px-2 h-fit text-muted-foreground flex items-center gap-2"

@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, FileWarning } from "lucide-react";
+import type { Document as PDFDocument, Page as PDFPage } from "react-pdf";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { Dispatch, SetStateAction } from "react";
 

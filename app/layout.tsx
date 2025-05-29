@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
+import { cn } from '@/lib/utils';
+import { fontSans } from '@/styles/fonts';
 
 import { ThemeProvider } from '@/components/theme-provider';
 
 import './globals.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Next.js Chatbot Template',
-  description: 'Next.js chatbot template using the AI SDK.',
+  title: 'Resume Builder',
+  description: 'Build your resume with AI',
 };
 
 export const viewport = {
@@ -35,36 +38,35 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      // `next-themes` injects an extra classname to the body element to avoid
-      // visual flicker before hydration. Hence the `suppressHydrationWarning`
-      // prop is necessary to avoid the React hydration mismatch warning.
-      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+        <link
+          rel="preload"
+          href="//unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs"
+          as="script"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body className="antialiased">
+      <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="top-center" />
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
