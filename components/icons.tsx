@@ -1,3 +1,8 @@
+interface IconProps {
+  size?: number;
+  className?: string;
+}
+
 export const BotIcon = () => {
   return (
     <svg
@@ -265,24 +270,25 @@ export const RouteIcon = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-export const FileIcon = ({ size = 16 }: { size?: number }) => {
+export function FileIcon({ size = 24, className }: IconProps) {
   return (
     <svg
-      height={size}
-      strokeLinejoin="round"
-      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
       width={size}
-      style={{ color: 'currentcolor' }}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
     >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M14.5 13.5V6.5V5.41421C14.5 5.149 14.3946 4.89464 14.2071 4.70711L9.79289 0.292893C9.60536 0.105357 9.351 0 9.08579 0H8H3H1.5V1.5V13.5C1.5 14.8807 2.61929 16 4 16H12C13.3807 16 14.5 14.8807 14.5 13.5ZM13 13.5V6.5H9.5H8V5V1.5H3V13.5C3 14.0523 3.44772 14.5 4 14.5H12C12.5523 14.5 13 14.0523 13 13.5ZM9.5 5V2.12132L12.3787 5H9.5ZM5.13 5.00062H4.505V6.25062H5.13H6H6.625V5.00062H6H5.13ZM4.505 8H5.13H11H11.625V9.25H11H5.13H4.505V8ZM5.13 11H4.505V12.25H5.13H11H11.625V11H11H5.13Z"
-        fill="currentColor"
-      />
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14 2 14 8 20 8" />
     </svg>
   );
-};
+}
 
 export const LoaderIcon = ({ size = 16 }: { size?: number }) => {
   return (
@@ -410,11 +416,11 @@ export const PencilEditIcon = ({ size = 16 }: { size?: number }) => {
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M11.75 0.189331L12.2803 0.719661L15.2803 3.71966L15.8107 4.24999L15.2803 4.78032L5.15901 14.9016C4.45575 15.6049 3.50192 16 2.50736 16H0.75H0V15.25V13.4926C0 12.4981 0.395088 11.5442 1.09835 10.841L11.2197 0.719661L11.75 0.189331ZM11.75 2.31065L9.81066 4.24999L11.75 6.18933L13.6893 4.24999L11.75 2.31065ZM2.15901 11.9016L8.75 5.31065L10.6893 7.24999L4.09835 13.841C3.67639 14.2629 3.1041 14.5 2.50736 14.5H1.5V13.4926C1.5 12.8959 1.73705 12.3236 2.15901 11.9016ZM9 16H16V14.5H9V16Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
+        d="M11.75 0.189331L12.2803 0.719661L15.2803 3.71966L15.8107 4.24999L15.2803 4.78032L13.7374 6.32322C13.1911 6.8696 12.3733 6.97916 11.718 6.65188L9.54863 10.5568C8.71088 12.0648 7.12143 13 5.39639 13H0.75H0V12.25V7.6036C0 5.87856 0.935237 4.28911 2.4432 3.45136L6.34811 1.28196C6.02084 0.62674 6.13039 0.20894 6.67678 0.20894L8.21967 0.20894L8.75 0.189331ZM7.3697 5.43035L10.5696 8.63029L8.2374 12.8283C7.6642 13.8601 6.57668 14.5 5.39639 14.5H2.56066L5.53033 11.5303L4.46967 10.4697L1.5 13.4393V10.6036C1.5 9.42331 2.1399 8.33579 3.17166 7.76259L7.3697 5.43035ZM12.6768 8.26256C12.5791 8.36019 12.4209 8.36019 12.3232 8.26255L12.0303 7.96966L8.03033 3.96966L7.73744 3.67677C7.63981 3.57914 7.63981 3.42085 7.73744 3.32321L8.75 2.31065L13.6893 7.24999L12.6768 8.26256Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 };
 
 export const CheckedSquare = ({ size = 16 }: { size?: number }) => {
@@ -850,6 +856,25 @@ export const CheckCirclFillIcon = ({ size = 16 }: { size?: number }) => {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8ZM11.5303 6.53033L12.0607 6L11 4.93934L10.4697 5.46967L6.5 9.43934L5.53033 8.46967L5 7.93934L3.93934 9L4.46967 9.53033L5.96967 11.0303C6.26256 11.3232 6.73744 11.3232 7.03033 11.0303L11.5303 6.53033Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+};
+
+export const CodeIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      viewBox="0 0 16 16"
+      width={size}
+      style={{ color: 'currentcolor' }}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4.72 3.22a.75.75 0 011.06 1.06L2.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L.47 8.53a.75.75 0 010-1.06l4.25-4.25zm6.56 0a.75.75 0 10-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 101.06 1.06l4.25-4.25a.75.75 0 000-1.06l-4.25-4.25z"
         fill="currentColor"
       />
     </svg>

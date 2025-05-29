@@ -4,16 +4,26 @@ import type { Message } from 'ai';
 import cx from 'classnames';
 import { motion } from 'framer-motion';
 import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 
 import type { Vote } from '@/lib/db/schema';
 
 import type { UIBlock } from './block';
 import { DocumentToolCall, DocumentToolResult } from './document';
-import { SparklesIcon } from './icons';
+import { SparklesIcon, MessageIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
+import { Button } from './ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import LatexEditor from './latex-editor';
+
+// Function to detect LaTeX content in messages
+function detectLatexContent(text: string): string | null {
+  const latexMatch = text.match(/```latex\n([\s\S]*?)(?:\n```|$)/);
+  return latexMatch ? latexMatch[1] : null;
+}
 
 export const PreviewMessage = ({
   chatId,
@@ -30,6 +40,8 @@ export const PreviewMessage = ({
   vote: Vote | undefined;
   isLoading: boolean;
 }) => {
+  const latexContent = message.role === 'assistant' ? detectLatexContent(message.content as string) : null;
+
   return (
     <motion.div
       className="w-full mx-auto max-w-3xl px-4 group/message"
@@ -130,13 +142,34 @@ export const PreviewMessage = ({
             </div>
           )}
 
-          <MessageActions
-            key={`action-${message.id}`}
-            chatId={chatId}
-            message={message}
-            vote={vote}
-            isLoading={isLoading}
-          />
+          <div className="flex items-center justify-between">
+            <MessageActions
+              key={`action-${message.id}`}
+              chatId={chatId}
+              message={message}
+              vote={vote}
+              isLoading={isLoading}
+            />
+            {latexContent && (
+              <Button
+                variant="outline"
+                className="py-1 px-2 h-fit text-muted-foreground flex items-center gap-2"
+                onClick={() => {
+                  setBlock((currentBlock) => ({
+                    ...currentBlock,
+                    content: latexContent,
+                    isLatex: true,
+                    isVisible: true,
+                    title: 'LaTeX Editor',
+                  }));
+                }}
+                disabled={block.isVisible}
+              >
+                <MessageIcon size={16} />
+                <span className="text-sm">Open in LaTeX Editor</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

@@ -189,9 +189,10 @@ export default function LatexEditor({
   };
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
       <Editor
         height="100%"
+        width="100%"
         language="latex"
         theme="light"
         value={editorContent}

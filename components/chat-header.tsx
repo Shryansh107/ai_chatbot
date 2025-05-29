@@ -24,19 +24,21 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
 
   if (!mounted) {
     return (
-      <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
+      <header className="flex sticky top-0 bg-background border-b py-2 items-center px-4 gap-2">
         <SidebarToggle />
-        <ModelSelector
-          selectedModelId={selectedModelId}
-          className="order-1 md:order-2"
-        />
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg font-semibold">Resume Builder</h1>
+        </div>
       </header>
     );
   }
 
   return (
-    <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
+    <header className="flex sticky top-0 bg-background border-b py-2 items-center px-4 gap-2">
       <SidebarToggle />
+      <div className="flex items-center gap-2">
+        <h1 className="text-lg font-semibold">Resume Builder</h1>
+      </div>
       {(!open || windowWidth < 768) && (
         <BetterTooltip content="New Chat">
           <Button
@@ -52,22 +54,22 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
           </Button>
         </BetterTooltip>
       )}
-      <ModelSelector
-        selectedModelId={selectedModelId}
-        className="order-1 md:order-2"
-      />
-      {/* <Button
-        className="bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 hidden md:flex py-1.5 px-2 h-fit md:h-[34px] order-4 md:ml-auto"
-        asChild
-      >
-        <Link
-          href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fai-chatbot&env=AUTH_SECRET,OPENAI_API_KEY&envDescription=Learn%20more%20about%20how%20to%20get%20the%20API%20Keys%20for%20the%20application&envLink=https%3A%2F%2Fgithub.com%2Fvercel%2Fai-chatbot%2Fblob%2Fmain%2F.env.example&demo-title=AI%20Chatbot&demo-description=An%20Open-Source%20AI%20Chatbot%20Template%20Built%20With%20Next.js%20and%20the%20AI%20SDK%20by%20Vercel.&demo-url=https%3A%2F%2Fchat.vercel.ai&stores=%5B%7B%22type%22:%22postgres%22%7D,%7B%22type%22:%22blob%22%7D%5D"
-          target="_noblank"
+      <div className="ml-auto flex items-center gap-2">
+        <div className="bg-black text-white rounded-full px-4 py-1 text-sm flex items-center gap-1">
+          <span>ATS Score:</span>
+          <span className="font-semibold">85%</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
         >
-          <VercelIcon size={16} />
-          Deploy with Vercel
-        </Link>
-      </Button> */}
+          <span className="sr-only">User menu</span>
+          <div className="w-6 h-6 rounded-full bg-zinc-300 flex items-center justify-center text-xs text-zinc-600">
+            S
+          </div>
+        </Button>
+      </div>
     </header>
   );
 }

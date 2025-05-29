@@ -28,7 +28,7 @@ import { fetcher } from '@/lib/utils';
 import { DiffView } from './diffview';
 import { DocumentSkeleton } from './document-skeleton';
 import { Editor } from './editor';
-import { CopyIcon, CrossIcon, DeltaIcon, RedoIcon, UndoIcon } from './icons';
+import { CopyIcon, CrossIcon, DeltaIcon, RedoIcon, UndoIcon, CodeIcon, FileIcon } from './icons';
 import { PreviewMessage } from './message';
 import { MultimodalInput } from './multimodal-input';
 import { Toolbar } from './toolbar';
@@ -36,6 +36,16 @@ import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useScrollToBottom } from './use-scroll-to-bottom';
 import { VersionFooter } from './version-footer';
+import LatexEditor from './latex-editor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+// import 'katex/dist/katex.min.css';
+
+// Function to detect LaTeX content in messages
+function detectLatexContent(text: string): string | null {
+  const latexMatch = text.match(/```latex\n([\s\S]*?)(?:\n```|$)/);
+  return latexMatch ? latexMatch[1] : null;
+}
+
 export interface UIBlock {
   title: string;
   documentId: string;
@@ -48,6 +58,7 @@ export interface UIBlock {
     width: number;
     height: number;
   };
+  isLatex?: boolean;
 }
 
 export function Block({
@@ -113,9 +124,28 @@ export function Block({
     },
   );
 
-  const [mode, setMode] = useState<'edit' | 'diff'>('edit');
+  const [mode, setMode] = useState<'edit' | 'diff' | 'latex'>('edit');
   const [document, setDocument] = useState<Document | null>(null);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+
+  // Effect to detect LaTeX content in messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        const latexContent = detectLatexContent(lastMessage.content);
+        if (latexContent) {
+          setBlock((currentBlock) => ({
+            ...currentBlock,
+            content: latexContent,
+            isLatex: true,
+          }));
+          setMode('latex');
+        }
+      }
+    }
+  }, [messages, setBlock]);
 
   useEffect(() => {
     if (documents && documents.length > 0) {
@@ -217,7 +247,11 @@ export function Block({
     }
 
     if (type === 'toggle') {
-      setMode((mode) => (mode === 'edit' ? 'diff' : 'edit'));
+      if (block.isLatex) {
+        setMode((mode) => (mode === 'latex' ? 'edit' : 'latex'));
+      } else {
+        setMode((mode) => (mode === 'edit' ? 'diff' : 'edit'));
+      }
     }
 
     if (type === 'prev') {
@@ -250,15 +284,10 @@ export function Block({
   const [_, copyToClipboard] = useCopyToClipboard();
 
   return (
-    <motion.div
-      className="flex flex-row h-dvh w-dvw fixed top-0 left-0 z-50 bg-muted"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { delay: 0.4 } }}
-    >
+    <motion.div className="flex flex-row h-dvh w-dvw fixed top-0 left-0 z-50 bg-background">
       {!isMobile && (
         <motion.div
-          className="relative w-[400px] bg-muted dark:bg-background h-dvh shrink-0"
+          className="relative w-[40%] bg-muted dark:bg-background h-dvh shrink-0 border-r"
           initial={{ opacity: 0, x: 10, scale: 1 }}
           animate={{
             opacity: 1,
@@ -289,10 +318,10 @@ export function Block({
             )}
           </AnimatePresence>
 
-          <div className="flex flex-col h-full justify-between items-center gap-4">
+          <div className="flex flex-col h-full justify-between items-stretch gap-4">
             <div
               ref={messagesContainerRef}
-              className="flex flex-col gap-4 h-full items-center overflow-y-scroll px-4 pt-20"
+              className="flex flex-col gap-4 h-full overflow-y-scroll px-4 pt-20"
             >
               {messages.map((message, index) => (
                 <PreviewMessage
@@ -316,28 +345,34 @@ export function Block({
               />
             </div>
 
-            <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4">
-              <MultimodalInput
-                chatId={chatId}
-                input={input}
-                setInput={setInput}
-                handleSubmit={handleSubmit}
-                isLoading={isLoading}
-                stop={stop}
-                attachments={attachments}
-                setAttachments={setAttachments}
-                messages={messages}
-                append={append}
-                className="bg-background dark:bg-muted"
-                setMessages={setMessages}
-              />
-            </form>
+            <div className="sticky bottom-0 w-full px-4 pb-4 bg-muted dark:bg-background">
+              <form className="flex flex-row gap-2 relative items-end w-full">
+                <MultimodalInput
+                  chatId={chatId}
+                  input={input}
+                  setInput={setInput}
+                  handleSubmit={handleSubmit}
+                  isLoading={isLoading}
+                  stop={stop}
+                  attachments={attachments}
+                  setAttachments={setAttachments}
+                  messages={messages}
+                  append={append}
+                  className="bg-background dark:bg-muted"
+                  setMessages={setMessages}
+                />
+              </form>
+            </div>
           </div>
         </motion.div>
       )}
 
       <motion.div
-        className="fixed dark:bg-muted bg-background h-dvh flex flex-col shadow-xl overflow-y-scroll"
+        className="fixed dark:bg-background bg-background h-dvh flex flex-col shadow-xl overflow-hidden"
+        style={{
+          left: isMobile ? 0 : '40%',
+          width: isMobile ? '100%' : '60%',
+        }}
         initial={
           isMobile
             ? {
@@ -375,10 +410,10 @@ export function Block({
               }
             : {
                 opacity: 1,
-                x: 400,
+                x: 0,
                 y: 0,
                 height: windowHeight,
-                width: windowWidth ? windowWidth - 400 : 'calc(100dvw-400px)',
+                width: '60%',
                 borderRadius: 0,
                 transition: {
                   delay: 0,
@@ -399,162 +434,119 @@ export function Block({
           },
         }}
       >
-        <div className="p-2 flex flex-row justify-between items-start">
-          <div className="flex flex-row gap-4 items-start">
-            <Button
-              variant="outline"
-              className="h-fit p-2 dark:hover:bg-zinc-700"
-              onClick={() => {
-                setBlock((currentBlock) => ({
-                  ...currentBlock,
-                  isVisible: false,
-                }));
-              }}
-            >
-              <CrossIcon size={18} />
-            </Button>
+        <Tabs defaultValue="editor" className="flex-1 flex flex-col">
+          <div className="border-b px-4 h-12 flex items-center justify-between">
+            <TabsList className="border-0 bg-transparent h-full">
+              <TabsTrigger 
+                value="editor" 
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none flex items-center gap-2"
+              >
+                <CodeIcon size={16} />
+                LaTeX
+              </TabsTrigger>
+              <TabsTrigger 
+                value="preview"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none flex items-center gap-2"
+              >
+                <FileIcon size={16} />
+                Preview
+              </TabsTrigger>
+            </TabsList>
 
-            <div className="flex flex-col">
-              <div className="font-medium">
-                {document?.title ?? block.title}
-              </div>
-
-              {isContentDirty ? (
-                <div className="text-sm text-muted-foreground">
-                  Saving changes...
-                </div>
-              ) : document ? (
-                <div className="text-sm text-muted-foreground">
-                  {`Updated ${formatDistance(
-                    new Date(document.createdAt),
-                    new Date(),
-                    {
-                      addSuffix: true,
-                    },
-                  )}`}
-                </div>
-              ) : (
-                <div className="w-32 h-3 mt-2 bg-muted-foreground/20 rounded-md animate-pulse" />
-              )}
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="default"
+                className="h-8"
+              >
+                Export
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  copyToClipboard(block.content);
+                  toast.success('Copied to clipboard!');
+                }}
+              >
+                <CopyIcon size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  setBlock((currentBlock) => ({
+                    ...currentBlock,
+                    isVisible: false,
+                  }));
+                }}
+              >
+                <CrossIcon size={16} />
+              </Button>
             </div>
           </div>
 
-          <div className="flex flex-row gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="p-2 h-fit dark:hover:bg-zinc-700"
-                  onClick={() => {
-                    copyToClipboard(block.content);
-                    toast.success('Copied to clipboard!');
-                  }}
-                  disabled={block.status === 'streaming'}
-                >
-                  <CopyIcon size={18} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy to clipboard</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="p-2 h-fit dark:hover:bg-zinc-700 !pointer-events-auto"
-                  onClick={() => {
-                    handleVersionChange('prev');
-                  }}
-                  disabled={
-                    currentVersionIndex === 0 || block.status === 'streaming'
-                  }
-                >
-                  <UndoIcon size={18} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>View Previous version</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="p-2 h-fit dark:hover:bg-zinc-700 !pointer-events-auto"
-                  onClick={() => {
-                    handleVersionChange('next');
-                  }}
-                  disabled={isCurrentVersion || block.status === 'streaming'}
-                >
-                  <RedoIcon size={18} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>View Next version</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cx(
-                    'p-2 h-fit !pointer-events-auto dark:hover:bg-zinc-700',
-                    {
-                      'bg-muted': mode === 'diff',
-                    },
-                  )}
-                  onClick={() => {
-                    handleVersionChange('toggle');
-                  }}
-                  disabled={
-                    block.status === 'streaming' || currentVersionIndex === 0
-                  }
-                >
-                  <DeltaIcon size={18} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>View changes</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-
-        <div className="prose dark:prose-invert dark:bg-muted bg-background h-full overflow-y-scroll px-4 py-8 md:p-20 !max-w-full pb-40 items-center">
-          <div className="flex flex-row max-w-[600px] mx-auto">
-            {isDocumentsFetching && !block.content ? (
-              <DocumentSkeleton />
-            ) : mode === 'edit' ? (
-              <Editor
-                content={
-                  isCurrentVersion
-                    ? block.content
-                    : getDocumentContentById(currentVersionIndex)
-                }
-                isCurrentVersion={isCurrentVersion}
-                currentVersionIndex={currentVersionIndex}
-                status={block.status}
-                saveContent={saveContent}
-                suggestions={isCurrentVersion ? (suggestions ?? []) : []}
-              />
-            ) : (
-              <DiffView
-                oldContent={getDocumentContentById(currentVersionIndex - 1)}
-                newContent={getDocumentContentById(currentVersionIndex)}
-              />
-            )}
-
-            {suggestions ? (
-              <div className="md:hidden h-dvh w-12 shrink-0" />
-            ) : null}
-
-            <AnimatePresence>
-              {isCurrentVersion && (
-                <Toolbar
-                  isToolbarVisible={isToolbarVisible}
-                  setIsToolbarVisible={setIsToolbarVisible}
-                  append={append}
-                  isLoading={isLoading}
-                  stop={stop}
-                  setMessages={setMessages}
+          <TabsContent value="editor" className="flex-1 m-0 p-0 data-[state=active]:flex">
+            <div className="w-full h-full bg-white">
+              {isDocumentsFetching && !block.content ? (
+                <DocumentSkeleton />
+              ) : mode === 'latex' && block.isLatex ? (
+                <div className="w-full h-full">
+                  <LatexEditor
+                    content={block.content}
+                    onChange={(newContent) => saveContent(newContent, true)}
+                    readOnly={!isCurrentVersion}
+                  />
+                </div>
+              ) : mode === 'edit' ? (
+                block.isLatex ? (
+                  <div className="w-full flex flex-col">
+                    <Editor
+                      content={`\`\`\`latex\n${isCurrentVersion ? block.content : getDocumentContentById(currentVersionIndex)}\n\`\`\``}
+                      isCurrentVersion={isCurrentVersion}
+                      currentVersionIndex={currentVersionIndex}
+                      status={block.status}
+                      saveContent={(content) => {
+                        const latexContent = detectLatexContent(content);
+                        if (latexContent) {
+                          saveContent(latexContent, true);
+                        }
+                      }}
+                      suggestions={isCurrentVersion ? (suggestions ?? []) : []}
+                    />
+                  </div>
+                ) : (
+                  <Editor
+                    content={
+                      isCurrentVersion
+                        ? block.content
+                        : getDocumentContentById(currentVersionIndex)
+                    }
+                    isCurrentVersion={isCurrentVersion}
+                    currentVersionIndex={currentVersionIndex}
+                    status={block.status}
+                    saveContent={saveContent}
+                    suggestions={isCurrentVersion ? (suggestions ?? []) : []}
+                  />
+                )
+              ) : (
+                <DiffView
+                  oldContent={getDocumentContentById(currentVersionIndex - 1)}
+                  newContent={getDocumentContentById(currentVersionIndex)}
                 />
               )}
-            </AnimatePresence>
-          </div>
-        </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="preview" className="flex-1 m-0 p-0 data-[state=active]:flex">
+            <div className="flex items-center justify-center w-full h-full bg-white">
+              <div className="text-muted-foreground text-lg">
+                PDF Preview Coming Soon...
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <AnimatePresence>
           {!isCurrentVersion && (
