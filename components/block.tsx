@@ -568,7 +568,7 @@ export function Block({
             </div>
           </div>
 
-          <TabsContent value="editor" className="flex-1 m-0 p-0 data-[state=active]:flex">
+          <TabsContent value="editor" className="flex-1 m-0 p-0 data-[state=active]:flex overflow-hidden">
             <div className="w-full h-full bg-white">
               {isDocumentsFetching && !block.content ? (
                 <DocumentSkeleton />
@@ -619,7 +619,7 @@ export function Block({
               )}
             </div>
           </TabsContent>
-          <TabsContent value="preview" className="flex-1 m-0 p-0 data-[state=active]:flex">
+          <TabsContent value="preview" className="flex-1 m-0 p-0 data-[state=active]:flex overflow-hidden">
             <ResumePreview
               latexContent={block.content}
               pdfState={pdfState}

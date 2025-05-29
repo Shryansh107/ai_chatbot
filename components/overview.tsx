@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
-import Link from 'next/link';
+import { useCallback } from 'react';
 
-import { MessageIcon, VercelIcon } from './icons';
+interface OverviewProps {
+  setInput: (text: string) => void;
+}
 
-export const Overview = () => {
+export const Overview = ({ setInput }: OverviewProps) => {
+  const handleOptionClick = useCallback((text: string) => {
+    setInput(text);
+  }, [setInput]);
+
   return (
     <motion.div
       key="overview"
@@ -13,39 +19,41 @@ export const Overview = () => {
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ delay: 0.5 }}
     >
-      <div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl">
-        <p className="flex flex-row justify-center gap-4 items-center">
-          <VercelIcon size={32} />
-          <span>+</span>
-          <MessageIcon size={32} />
+      <div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl mx-auto">
+        <h1 className="text-2xl font-bold">Welcome to your Resume Builder!</h1>
+        <p className="text-muted-foreground mb-4">
+          I can help you create an ATS-friendly resume. Try asking:
         </p>
-        <p>
-          This is an{' '}
-          <Link
-            className="font-medium underline underline-offset-4"
-            href="https://github.com/vercel/ai-chatbot"
-            target="_blank"
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            onClick={() => handleOptionClick("Help me format my work experience section")}
+            className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            open source
-          </Link>{' '}
-          chatbot template built with Next.js and the AI SDK by Vercel. It uses
-          the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">streamText</code>{' '}
-          function in the server and the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">useChat</code> hook
-          on the client to create a seamless chat experience.
-        </p>
-        <p>
-          You can learn more about the AI SDK by visiting the{' '}
-          <Link
-            className="font-medium underline underline-offset-4"
-            href="https://sdk.vercel.ai/docs"
-            target="_blank"
+            "Help me format my work experience section"
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOptionClick("What skills should I include for a software developer role?")}
+            className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            docs
-          </Link>
-          .
-        </p>
+            "What skills should I include for a software developer role?"
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOptionClick("How can I make my resume more ATS-friendly?")}
+            className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+          >
+            "How can I make my resume more ATS-friendly?"
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOptionClick("Create a resume for a software engineer")}
+            className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+          >
+            "Create a resume for a software engineer"
+          </button>
+        </div>
       </div>
     </motion.div>
   );

@@ -27,7 +27,7 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
       <header className="flex sticky top-0 bg-background border-b py-2 items-center px-4 gap-2">
         <SidebarToggle />
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold">Resume Builder</h1>
+          <h1 className="text-lg font-semibold">rsume.fyi</h1>
         </div>
       </header>
     );
@@ -37,7 +37,7 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
     <header className="flex sticky top-0 bg-background border-b py-2 items-center px-4 gap-2">
       <SidebarToggle />
       <div className="flex items-center gap-2">
-        <h1 className="text-lg font-semibold">Resume Builder</h1>
+        <h1 className="text-lg font-semibold">rsume.fyi</h1>
       </div>
       {(!open || windowWidth < 768) && (
         <BetterTooltip content="New Chat">
