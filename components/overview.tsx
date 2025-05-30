@@ -30,28 +30,28 @@ export const Overview = ({ setInput }: OverviewProps) => {
             onClick={() => handleOptionClick("Help me format my work experience section")}
             className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            "Help me format my work experience section"
+            &quot;Help me format my work experience section&quot;
           </button>
           <button
             type="button"
             onClick={() => handleOptionClick("What skills should I include for a software developer role?")}
             className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            "What skills should I include for a software developer role?"
+            &quot;What skills should I include for a software developer role?&quot;
           </button>
           <button
             type="button"
             onClick={() => handleOptionClick("How can I make my resume more ATS-friendly?")}
             className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            "How can I make my resume more ATS-friendly?"
+            &quot;How can I make my resume more ATS-friendly?&quot;
           </button>
           <button
             type="button"
             onClick={() => handleOptionClick("Create a resume for a software engineer")}
             className="p-4 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
-            "Create a resume for a software engineer"
+            &quot;Create a resume for a software engineer&quot;
           </button>
         </div>
       </div>

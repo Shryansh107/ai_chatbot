@@ -39,7 +39,7 @@ export const resumeDocumentHandler = createDocumentHandler<"resume">({
     let draftContent = "";
 
     // Generate initial resume content based on title
-    const { fullStream } = streamText({
+    const { fullStream } = await streamText({
       model: openai("gemini-2.5-flash-preview-04-17"),
       system: resumeSystemPrompt,
       prompt: `Create a professional LaTeX resume with the title "${title}". Include standard sections like Education, Experience, Skills, etc. Make it ATS-friendly.`,
@@ -64,7 +64,7 @@ export const resumeDocumentHandler = createDocumentHandler<"resume">({
     let draftContent = "";
 
     // Update the resume based on user's request
-    const { fullStream } = streamText({
+    const { fullStream } = await streamText({
       model: openai("gemini-2.5-flash-preview-04-17"),
       system: updateResumePrompt(document.content),
       prompt: description,
